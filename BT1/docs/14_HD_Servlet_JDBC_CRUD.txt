@@ -1,0 +1,801 @@
+=====PAGE 1 =====
+WEB
+PR33
+0479
+KHOA CÔNG NGHỆ THÔNG TIN
+BỘ MÔN CÔNG NGHỆ PHẦN MỀM
+LẬP TRÌNH WEB (WEBPR330479)
+THS. NGUYỄN HỮU TRUNG
+Hướng dẫn CRUD với
+Servlet JDBC
+=====PAGE 2 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+2
+ Bước 1: Tạo Database: ServletCRUDMVC, Tạo cấu trúc bảng
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE Category(
+[cate_id] [int] IDENTITY(1,1) NOT NULL,
+[cate_name] [nvarchar](255) NOT NULL,
+[icons] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+[cate_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, 
+IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, 
+ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+=====PAGE 3 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+3
+ Bước 2: Tạo Maven Project và cấu hình dependency trong file pom.xml
+<!– Servlet JEE -->
+<dependency>
+<groupId>javax.servlet</groupId>
+<artifactId>javax.servlet-api</artifactId>
+<version>3.1.0</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>javax.servlet.jsp</groupId>
+<artifactId>javax.servlet.jsp-api</artifactId>
+<version>2.3.1</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>jstl</groupId>
+<artifactId>jstl</artifactId>
+<version>1.2</version>
+</dependency>
+=====PAGE 4 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+4
+ Bước 2: Tạo Maven Project và cấu hình dependency trong file pom.xml
+<!– Servlet Jakarta -->
+<dependency>
+<groupId>javax.servlet</groupId>
+<artifactId>javax.servlet-api</artifactId>
+<version>3.1.0</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>javax.servlet.jsp</groupId>
+<artifactId>javax.servlet.jsp-api</artifactId>
+<version>2.3.1</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>jstl</groupId>
+<artifactId>jstl</artifactId>
+<version>1.2</version>
+</dependency>
+=====PAGE 5 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+5
+ Bước 2: Tạo Maven Project và cấu hình dependency trong file pom.xml
+<!-- Thư viện MySQL JDBC driver -->
+<dependency>
+   <groupId>mysql</groupId>
+   <artifactId>mysql-connector-java</artifactId>
+   <version>8.0.13</version>
+</dependency>
+<!-- Thư viện SQL server JDBC driver -->
+<dependency>
+<groupId>com.microsoft.sqlserver</groupId>
+<artifactId>mssql-jdbc</artifactId>
+<version>9.4.0.jre8</version>
+</dependency>
+<dependency>
+<groupId>commons-fileupload</groupId>
+<artifactId>commons-fileupload</artifactId>
+<version>1.4</version>
+</dependency>
+=====PAGE 6 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+6
+ Bước 2: Tạo Maven Project và cấu hình dependency trong file pom.xml
+<build>
+<plugins>
+<plugin>
+<artifactId>maven-war-plugin</artifactId>
+<version>3.3.2</version>
+</plugin>
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-compiler-plugin</artifactId>
+<version>3.8.1</version>
+<configuration>
+<source>17</source>
+<target>17</target>
+</configuration>
+</plugin>
+</plugins>
+</build>
+=====PAGE 7 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+7
+ Bước 3: Cấu hình web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://JAVA.sun.com/xml/ns/javaee" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<display-name>Shopping Servlet Service MVC</display-name>
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+<session-config>
+<tracking-mode>COOKIE</tracking-mode>
+</session-config>
+</web-app>
+=====PAGE 8 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+8
+ Bước 4: Cấu hình Datasource
+public class DBConnection {
+public Connection getConnection()throws Exception {
+        String url = "jdbc:sqlserver://"+serverName+":"+portNumber + "\\" + instance 
++";databaseName="+dbName;
+        if(instance == null || instance.trim().isEmpty())
+            url = "jdbc:sqlserver://"+serverName+":"+portNumber 
++";databaseName="+dbName;
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        return DriverManager.getConnection(url, userID, password);
+    }   
+    private final String serverName = "localhost";
+    private final String dbName = "ShoppingServiceMVC";
+    private final String portNumber = "1433";
+    private final String instance="";//MSSQLSERVER LEAVE THIS ONE EMPTY IF YOUR SQL 
+IS A SINGLE INSTANCE
+private final String userID = "sa";
+private final String password = "1234@a$";
+}
+=====PAGE 9 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+9
+ Bước 5: Tạo Class Model: Category.java
+package vn.iotstar.model;
+public class Category {
+private int cateid;
+private String catename;
+private String icon;
+//Tạo constructor, getters/setters
+}
+=====PAGE 10 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+10
+ Bước 6: Tạo Interface DAO: CategoryDAO.java
+package vn.iotstar.dao;
+import java.util.List;
+import vn.iotstar.model.Category;
+public interface CategoryDao {
+ void insert(Category category);
+ void edit(Category category);
+ void delete(int id);
+ Category get(int id);
+ Category get(String name);
+ List<Category> getAll();
+ List<Category> search(String keyword);
+   
+}
+=====PAGE 11 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+11
+ Bước 7: Tạo Calss DAOImpl: CategoryDAOImpl.java
+package vn.iotstar.dao.impl;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import vn.iotstar.dao.CategoryDao;
+import vn.iotstar.connection.DBConnection;
+import vn.iotstar.model.Category;
+public class CategoryDaoImpl extends DBConnection implements CategoryDao 
+{
+=====PAGE 12 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+12
+ Bước 7: Tạo Calss DAOImpl: CategoryDAOImpl.java
+@Override
+public void insert(Category category) {
+String sql = "INSERT INTO category(cate_name,icons) VALUES (?,?)";
+try {
+Connection con = super.getConnection();
+PreparedStatement ps = con.prepareStatement(sql);
+ps.setString(1, category.getName());
+ps.setString(2, category.getIcon());
+ps.executeUpdate();
+} catch (Exception e) {
+e.printStackTrace();
+}
+}
+=====PAGE 13 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+13
+ Bước 7: Tạo Calss DAOImpl: CategoryDAOImpl.java
+@Override
+public void edit(Category category) {
+String sql = "UPDATE category SET cate_name = ?, icons=? WHERE cate_id = ?";
+try {
+Connection con = super.getConnection();
+PreparedStatement ps = con.prepareStatement(sql);
+ps.setString(1, category.getName());
+ps.setString(2, category.getIcon());
+ps.setInt(3, category.getId());
+ps.executeUpdate();
+} catch (Exception e) {
+// TODO Auto-generated catch block
+e.printStackTrace();
+}
+}
+=====PAGE 14 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+14
+ Bước 7: Tạo Calss DAOImpl: CategoryDAOImpl.java
+@Override
+public void delete(int id) {
+String sql = "DELETE FROM category WHERE cate_id = ?";
+try {
+Connection con = super.getConnection();
+PreparedStatement ps = con.prepareStatement(sql);
+ps.setInt(1, id);
+ps.executeUpdate();
+} catch (Exception e) {
+e.printStackTrace();
+}
+}
+=====PAGE 15 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+15
+ Bước 7: Tạo Calss DAOImpl: CategoryDAOImpl.java
+@Override
+public Category get(int id) {
+String sql = "SELECT * FROM category WHERE cate_id = ? ";
+try {
+Connection con = super.getConnection();
+PreparedStatement ps = con.prepareStatement(sql);
+ps.setInt(1, id);
+ResultSet rs = ps.executeQuery();
+while (rs.next()) {
+Category category = new Category();
+category.setId(rs.getInt("cate_id"));
+category.setName(rs.getString("cate_name"));
+category.setIcon(rs.getString("icons"));
+return category;
+}} catch (Exception e) {
+e.printStackTrace();}
+return null;
+}
+=====PAGE 16 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+16
+ Bước 7: Tạo Calss DAOImpl: CategoryDAOImpl.java
+@Override
+public List<Category> getAll() {
+List<Category> categories = new ArrayList<Category>();
+String sql = "SELECT * FROM Category";
+try {
+Connection conn = super.getConnection();
+PreparedStatement ps = conn.prepareStatement(sql);
+ResultSet rs = ps.executeQuery();
+while (rs.next()) {
+Category category = new Category();
+category.setId(rs.getInt("cate_id"));
+category.setName(rs.getString("cate_name"));
+category.setIcon(rs.getString("icons"));
+categories.add(category);
+}} catch (Exception e) {
+e.printStackTrace();}
+return categories;
+}
+=====PAGE 17 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+17
+ Bước 8: Tạo interface  Service: CategoryService.java
+package vn.iotstar.service;
+import java.util.List;
+import vn.iotstar.model.Category;
+public interface CategoryService {
+void insert(Category category);
+void edit(Category category);
+void delete(int id);
+Category get(int id);
+Category get(String name);
+List<Category> getAll();
+List<Category> search(String keyword);
+}
+=====PAGE 18 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+18
+ Bước 8: Tạo class  Service: CategoryServiceImpl.java
+package vn.iotstar.service.impl;
+import java.util.List;
+import vn.iotstar.dao.CategoryDao;
+import vn.iotstar.dao.impl.CategoryDaoImpl;
+import vn.iotstar.model.Category;
+import vn.iotstar.service.CategoryService;
+public class CategoryServiceImpl implements CategoryService {
+CategoryDao categoryDao = new CategoryDaoImpl();
+@Override
+public void insert(Category category) {
+categoryDao.insert(category);
+}
+@Override
+public void edit(Category newCategory) {
+Category oldCate = categoryDao.get(newCategory.getId());
+oldCate.setName(newCategory.getName());
+categoryDao.edit(oldCate);
+}
+=====PAGE 19 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+19
+ Bước 8: Tạo classs  Service: CategoryServiceImpl.java
+@Override
+public void insert(Category category) {
+categoryDao.insert(category);
+}
+package vn.iotstar.service.impl;
+import java.io.File;
+import java.util.List;
+import vn.iotstar.dao.CategoryDao;
+import vn.iotstar.dao.impl.CategoryDaoImpl;
+import vn.iotstar.model.Category;
+import vn.iotstar.service.CategoryService;
+public class CategoryServiceImpl implements CategoryService {
+CategoryDao categoryDao = new CategoryDaoImpl();
+@Override
+public void delete(int id) {
+categoryDao.delete(id);
+}
+@Override
+public Category get(int id) {
+return categoryDao.get(id);
+}
+=====PAGE 20 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+20
+ Bước 8: Tạo classs  Service: CategoryServiceImpl.java
+@Override
+public void edit(Category newCategory) {
+Category oldCategory = categoryDao.get(newCategory.getId());
+oldCategory.setName(newCategory.getName());
+if (newCategory.getIcon() != null) {
+// XOA ANH CU DI
+String fileName = oldCategory.getIcon();
+final String dir = "E:\\upload";
+File file = new File(dir + "/category" + fileName);
+if (file.exists()) {
+file.delete();
+}
+oldCategory.setIcon(newCategory.getIcon());
+}
+categoryDao.edit(oldCategory);
+}
+=====PAGE 21 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+21
+ Bước 8: Tạo classs  Service: CategoryServiceImpl.java
+@Override
+public Category get(String name) {
+return categoryDao.get(name);
+}
+@Override
+public List<Category> getAll() {
+return categoryDao.getAll();
+}
+@Override
+public List<Category> search(String catename) {
+return categoryDao.search(catename);
+}
+=====PAGE 22 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+22
+ Bước 9: Tạo Calss Controller: CategoryController.java
+@WebServlet(urlPatterns = { "/admin/category/list" })
+public class CategoryeListController extends HttpServlet {
+CategoryService cateService = new CategoryServiceImpl();
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws 
+ServletException, IOException {
+List<Category> cateList = cateService.getAll();
+req.setAttribute("cateList", cateList);
+RequestDispatcher dispatcher = req.getRequestDispatcher("/views/admin/list-
+category.jsp");
+dispatcher.forward(req, resp);
+}
+}
+=====PAGE 23 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+23
+ Bước 9: Tạo Calss Controller: CategoryEditController.java
+@WebServlet(urlPatterns = { "/admin/category/edit" })
+public class CategoryeEditController extends HttpServlet {
+CategoryService cateService = new CategoryServiceImpl();
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws 
+ServletException, IOException {
+String id = req.getParameter("id");
+Category category = cateService.get(Integer.parseInt(id));
+req.setAttribute("category", category);
+RequestDispatcher dispatcher = req.getRequestDispatcher("/views/admin/edit-
+category.jsp");
+dispatcher.forward(req, resp);
+}
+=====PAGE 24 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+24
+ Bước 9: Tạo Calss Controller: CategoryEditController.java
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+throws ServletException, IOException {
+Category category = new Category();
+DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory();
+ServletFileUpload servletFileUpload = new 
+ServletFileUpload(diskFileItemFactory);
+servletFileUpload.setHeaderEncoding("UTF-8"); 
+try {
+resp.setContentType("text/html");
+resp.setCharacterEncoding("UTF-8");
+req.setCharacterEncoding("UTF-8");
+List<FileItem> items = servletFileUpload.parseRequest(req);
+for (FileItem item : items) {
+=====PAGE 25 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+25
+ Bước 9: Tạo Calss Controller: CategoryEditController.java
+if (item.getFieldName().equals("id")) {
+category.setId(Integer.parseInt(item.getString()));
+} else if (item.getFieldName().equals("name")) {
+category.setName(item.getString("UTF-8"));
+} else if (item.getFieldName().equals("icon")) {
+if (item.getSize() > 0) {// neu co file d
+String originalFileName = item.getName();
+int index = originalFileName.lastIndexOf(".");
+String ext = originalFileName.substring(index + 1);
+String fileName = System.currentTimeMillis() + "." + ext;
+File file = new File(Constant.DIR + "/category/" + fileName);
+item.write(file);
+category.setIcon("category/"+fileName);
+} else {
+category.setIcon(null);}}}
+cateService.edit(category);
+resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+} catch (FileUploadException e) {
+e.printStackTrace();
+} catch (Exception e) {e.printStackTrace();}
+}
+=====PAGE 26 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+26
+ Bước 9: Tạo Calss Controller: CategoryAddController.java
+@WebServlet(urlPatterns = { "/admin/category/add" })
+public class CategoryAddController extends HttpServlet {
+CategoryService cateService = new CategoryServiceImpl();
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+throws ServletException, IOException {
+RequestDispatcher dispatcher = 
+req.getRequestDispatcher("/views/admin/add-category.jsp");
+dispatcher.forward(req, resp);
+}
+=====PAGE 27 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+27
+ Bước 9: Tạo Calss Controller: CategoryAddController.java
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+throws ServletException, IOException {
+Category category = new Category();
+DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory();
+ServletFileUpload servletFileUpload = new 
+ServletFileUpload(diskFileItemFactory);
+servletFileUpload.setHeaderEncoding("UTF-8"); 
+try {
+resp.setContentType("text/html");
+resp.setCharacterEncoding("UTF-8");
+req.setCharacterEncoding("UTF-8");
+List<FileItem> items = servletFileUpload.parseRequest(req);
+for (FileItem item : items) {
+if (item.getFieldName().equals("name")) {
+category.setName(item.getString("UTF-8"));
+=====PAGE 28 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+28
+ Bước 9: Tạo Calss Controller: CategoryAddController.java
+} else if (item.getFieldName().equals("icon")) {
+String originalFileName = item.getName();
+int index = originalFileName.lastIndexOf(".");
+String ext = originalFileName.substring(index + 1);
+String fileName = System.currentTimeMillis() + "." + ext;
+File file = new File(Constant.DIR + "/category/" + fileName);
+item.write(file);
+category.setIcon("category/"+fileName);
+}
+}
+cateService.insert(category);
+resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+} catch (FileUploadException e) {
+e.printStackTrace();
+} catch (Exception e) {
+e.printStackTrace();
+}
+}
+=====PAGE 29 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+29
+ Bước 9: Tạo Calss Controller: CategoryDeleteController.java
+@WebServlet(urlPatterns = { "/admin/category/delete" })
+public class CategoryeDeleteController extends HttpServlet {
+CategoryService cateService = new CategoryServiceImpl();
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+throws ServletException, IOException {
+String id = req.getParameter("id");
+cateService.delete(Integer.parseInt(id));
+resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+}
+}
+=====PAGE 30 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+30
+ Bước 10: Chỉnh lại trang list-category.jsp
+<c:forEach items="${cateList}" var="cate" varStatus="STT" >
+<tr class="odd gradeX">
+<td>${STT.index+1 }</td>
+<c:url value="/image?fname=${cate.icon }" var="imgUrl"></c:url>
+<td><img height="150" width="200" src="${imgUrl}" /></td>
+<td>${cate.name }</td>
+<td><a href="<c:url value='/admin/category/edit?id=${cate.id }'/>"
+class="center">Sửa</a>
+| <a href="<c:url value='/admin/category/delete?id=${cate.id }'/>"
+class="center">Xóa</a></td>
+</tr>
+</c:forEach>
+=====PAGE 31 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+31
+ Bước 10: Chỉnh lại trang add-category.jsp
+<form role="form" action="add" method="post"
+enctype="multipart/form-data">
+<div class="form-group">
+<label>Tên danh mục:</label> <input class="form-control"
+placeholder="please enter category Name" name="name" />
+</div>
+<div class="form-group">
+<label>Ảnh đại diện</label> <input type="file" name="icon" />
+</div>
+<button type="submit" class="btn btn-default">Thêm</button>
+<button type="reset" class="btn btn-primary">Hủy</button>
+</form>
+=====PAGE 32 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+32
+ Bước 11: Chỉnh lại trang edit-Category.jsp
+<c:url value="/admin/category/edit" var="edit"></c:url>
+<form role="form" action="${edit}" method="post"
+enctype="multipart/form-data">
+<input name="id" value="${category.id }" hidden="">
+<div class="form-group">
+<label>Tên danh sách:</label> <input type="text" class="form-control"
+value="${category.name }" name="name" />
+</div>
+<div class="form-group">
+<c:url value="/image?fname=${category.icon }" var="imgUrl"></c:url>
+<img class="img-responsive" width="100px" src="${imgUrl}"
+alt="">
+<label>Ảnh đại diện</label> <input type="file" name="icon" value="${category.icon }" />
+</div>
+<button type="submit" class="btn btn-default">Edit</button>
+<button type="reset" class="btn btn-primary">Reset</button>
+</form>
+=====PAGE 33 =====
+LT
+VB
+LT
+VB
+Class constant: khai báo các hằng số
+ThS. Nguyễn Hữu Trung
+33
+package vn.iotstar.util;
+public class Constant {
+public static final String DIR = "E:\\upload";
+}
+}
+=====PAGE 34 =====
+LT
+VB
+LT
+VB
+Download file
+ThS. Nguyễn Hữu Trung
+34
+@SuppressWarnings("serial")
+@WebServlet(urlPatterns = "/image") // ?fname=abc.png
+public class DownloadImageController extends HttpServlet {
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+throws ServletException, IOException {
+String fileName = req.getParameter("fname");
+File file = new File(Constant.DIR + "/" + fileName);
+resp.setContentType("image/jpeg");
+if (file.exists()) {
+IOUtils.copy(new FileInputStream(file), resp.getOutputStream());
+}
+}
+}
+=====PAGE 35 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+35
+ Bước 12: Kết quả
+
+=====PAGE 36 =====
+LT
+VB
+LT
+VB
+Ví dụ: CRUD cho Category Table
+ThS. Nguyễn Hữu Trung
+36
+ Bước 12: Kết quả

@@ -1,0 +1,757 @@
+==================== WEPR330479_26_1_09_ Nội dung 27_08_2026 _ UTEx.pdf
+--- page 1 ---
+H ư ớ ng d ẫ n CRUD v ớ i JPA3.0 và Jakarta 6.0
+1. T ạ o entity
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Table(name = "categories")
+@NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c")
+public class Category implements Serializable {
+ private static final long serialVersionUID = 1L;
+--- page 2 ---
+ @Id
+ @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Column(name = "CategoryId")
+ private int categoryid;
+ @Column(name = "CategoryName", columnDefinition = "nvarchar(50) not null")
+ @NotEmpty(message = "Không được phép rỗng")
+ private String categoryname;
+ @Column(name = "Images", columnDefinition = "nvarchar(500) null")
+ private String images;
+ private int status;
+ // bi-directional many-to-one association to Video
+ @OneToMany(mappedBy = "category")
+ private List<Video> videos;
+ public Video addVideo(Video video) {
+ getVideos().add(video);
+ video.setCategory(this);
+ return video;
+ }
+ public Video removeVideo(Video video) {
+--- page 3 ---
+ getVideos().remove(video);
+ video.setCategory(null);
+ return video;
+ }
+}
+==============
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Entity
+@Table(name="Videos")
+@NamedQuery(name="Video.findAll", query="SELECT v FROM Video v")
+public class Video implements Serializable{
+ private static final long serialVersionUID = 1L;
+ 
+ @Id
+ @Column(name="VideoId")
+ private String videoId;
+--- page 4 ---
+ @Column(name="Active")
+ private int active;
+ @Column(name="Description", columnDefinition = "nvarchar(500) null")
+ private String description;
+ @Column(name="Poster" , columnDefinition = "nvarchar(500) null")
+ private String poster;
+ @Column(name="Title" , columnDefinition = "nvarchar(500) null")
+ private String title;
+ @Column(name="Views")
+ private int views;
+ //bi-directional many-to-one association to Category
+ @ManyToOne
+ @JoinColumn(name="CategoryId")
+ private Category category;
+}
+2. Viết các phương thức tầng Dao
+public class CategoryDao implements ICategoryDao {
+ @Override
+--- page 5 ---
+ public void insert(Category category) {
+ EntityManager enma = JPAConfig.getEntityManager();
+ EntityTransaction trans = enma.getTransaction();
+ try {
+ trans.begin();
+ enma.persist(category);//insert vào bảng
+ trans.commit();
+ } catch (Exception e) {
+ e.printStackTrace();
+ trans.rollback();
+ throw e;
+ }finally {
+ enma.close();
+ }
+ }
+ @Override
+ public void update(Category category) {
+ EntityManager enma = JPAConfig.getEntityManager();
+ EntityTransaction trans = enma.getTransaction();
+ try {
+--- page 6 ---
+ trans.begin();
+ enma.merge(category);//update vào bảng
+ trans.commit();
+ } catch (Exception e) {
+ e.printStackTrace();
+ trans.rollback();
+ throw e;
+ }finally {
+ enma.close();
+ }
+ 
+ }
+ @Override
+ public void delete(int cateid) throws Exception {
+ EntityManager enma = JPAConfig.getEntityManager();
+ EntityTransaction trans = enma.getTransaction();
+ try {
+ trans.begin();
+ Category category = enma.find(Category.class,cateid);
+ if(category != null) {
+ enma.remove(category);
+--- page 7 ---
+ }else {
+ throw new Exception("Không tìm thấy");
+ }
+ trans.commit();
+ } catch (Exception e) {
+ e.printStackTrace();
+ trans.rollback();
+ throw e;
+ }finally {
+ enma.close();
+ }
+ 
+ }
+ @Override
+ public Category findById(int cateid) {
+ EntityManager enma = JPAConfig.getEntityManager();
+ Category category = enma.find(Category.class,cateid);
+ return category;
+ }
+ @Override
+--- page 8 ---
+ public Category findByCategoryname(String name) throws Exception {
+ EntityManager enma = JPAConfig.getEntityManager();
+ 
+ String jpql = "SELECT c FROM Category c WHERE c.categoryname =:catename";
+ try {
+ 
+ TypedQuery<Category> query= enma.createQuery(jpql, Category.class);
+ query.setParameter("catename", name);
+ Category category= query.getSingleResult();
+ if(category==null) {
+ throw new Exception("Category Name đã tồn tại");
+ }
+ return category;
+ } finally {
+ enma.close();
+ } 
+ 
+ 
+ }
+ @Override
+ public List<Category> findAll() {
+--- page 9 ---
+ EntityManager enma = JPAConfig.getEntityManager();
+ TypedQuery<Category> query= enma.createNamedQuery("Category.findAll", Category.c
+ return query.getResultList();
+ }
+ @Override
+ public List<Category> searchByName(String catname) {
+ EntityManager enma = JPAConfig.getEntityManager();
+ String jpql = "SELECT c FROM Category c WHERE c.catename like :catname";
+ TypedQuery<Category> query= enma.createQuery(jpql, Category.class);
+ query.setParameter("catename", "%" + catname + "%");
+ 
+ return query.getResultList();
+ }
+ @Override
+ public List<Category> findAll(int page, int pagesize) {
+ EntityManager enma = JPAConfig.getEntityManager();
+ TypedQuery<Category> query= enma.createNamedQuery("Category.findAll", Category.c
+ query.setFirstResult(page*pagesize);
+ query.setMaxResults(pagesize);
+ return query.getResultList();
+--- page 10 ---
+ }
+ @Override
+ public int count() {
+ EntityManager enma = JPAConfig.getEntityManager();
+ String jpql = "SELECT count(c) FROM Category c";
+ Query query = enma.createQuery(jpql);
+ return ((Long)query.getSingleResult()).intValue();
+ }
+======================
+pull up thành interface
+public interface ICategoryDao {
+ void insert(Category category);
+ int count();
+ List<Category> findAll(int page, int pagesize);
+ List<Category> searchByName(String catname);
+ List<Category> findAll();
+ Category findById(int cateid);
+--- page 11 ---
+ void delete(int cateid) throws Exception;
+ void update(Category category);
+ Category findByCategoryname(String name) throws Exception;
+}
+3. Viết các phương thức tầng Services
+public interface ICategoryService {
+ void insert(Category category);
+ int count();
+ List<Category> findAll(int page, int pagesize);
+ List<Category> searchByName(String catname);
+ List<Category> findAll();
+ Category findById(int cateid);
+ void delete(int cateid) throws Exception;
+ void update(Category category);
+ Category findByCategoryname(String name);
+ 
+}
+--- page 12 ---
+===============
+public class CategoryServiceImpl implements ICategoryService {
+ public ICategoryDao cateDao = new CategoryDao();
+ 
+ @Override
+ public List<Category> findAll() {
+ 
+ return cateDao.findAll();
+ }
+ @Override
+ public Category findById(int id) {
+ 
+ return cateDao.findById(id);
+ }
+ @Override
+ public List<Category> searchByName(String keyword) {
+ 
+ return cateDao.searchByName(keyword);
+--- page 13 ---
+ }
+ @Override
+ public void insert(Category category) {
+ Category cate = this.findByCategoryname(category.getCategoryname());
+ if(cate==null) {
+ cateDao.insert(category);
+ }
+ 
+ }
+ @Override
+ public void update(Category category) {
+ Category cate = this.findById(category.getCategoryid());
+ if(cate!=null) {
+ cateDao.update(category);
+ }
+ 
+ }
+ @Override
+ public void delete(int id){
+--- page 14 ---
+ try {
+ cateDao.delete(id);
+ } catch (Exception e) {
+ 
+ e.printStackTrace();
+ }
+ 
+ }
+ @Override
+ public int count() {
+ 
+ return cateDao.count();
+ }
+ @Override
+ public List<Category> findAll(int page, int pagesize) {
+ 
+ return cateDao.findAll(page, pagesize);
+ }
+--- page 15 ---
+ @Override
+ public Category findByCategoryname(String name) {
+ try {
+ return cateDao.findByCategoryname(name);
+ } catch (Exception e) {
+ e.printStackTrace();
+ }
+ return null;
+ }
+}
+5. Viết Controller
+@MultipartConfig()
+@WebServlet(urlPatterns = { "/admin/categories", "/admin/category/add", "/admin/c
+ "/admin/category/edit", "/admin/category/update", "/admin/category/delete" })
+public class CategoryController extends HttpServlet {
+ private static final long serialVersionUID = 1L;
+--- page 16 ---
+ public ICategoryService cateService = new CategoryServiceImpl();
+ @Override
+ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
+ String url = req.getRequestURI();
+ if (url.contains("/admin/categories")) {
+ List<Category> list = cateService.findAll();
+ req.setAttribute("listcate", list);
+ req.getRequestDispatcher("/views/admin/category-list.jsp").forward(req, resp);
+ } else if (url.contains("/admin/category/add")) {
+ req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+ } else if (url.contains("/admin/category/edit")) {
+ int id = Integer.parseInt(req.getParameter("id"));
+ Category category = cateService.findById(id);
+ req.setAttribute("cate", category);
+ req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
+ } else {
+ int id = Integer.parseInt(req.getParameter("id"));
+ try {
+ cateService.delete(id);
+ } catch (Exception e) {
+--- page 17 ---
+ // TODO Auto-generated catch block
+ e.printStackTrace();
+ }
+ // chuyển trang
+ resp.sendRedirect(req.getContextPath() + "/admin/categories");
+ }
+ }
+ @Override
+ protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws S
+ String url = req.getRequestURI();
+ if (url.contains("/admin/category/insert")) {
+ // lấy dữ liệu từ form
+ String categoryname = req.getParameter("categoryname");
+ int status = Integer.parseInt(req.getParameter("status"));
+ String images = req.getParameter("images");
+ // đưa dữ liệu vào model
+ Category category = new Category();
+ category.setCategoryname(categoryname);
+ category.setStatus(status);
+--- page 18 ---
+ String fname = "";
+ String uploadPath = constants.DIR; // upload vào thư mục bất kỳ
+ File uploadDir = new File(uploadPath);
+ if (!uploadDir.exists())
+ uploadDir.mkdir();
+ try {
+ Part part = req.getPart("images1");
+ if (part.getSize() > 0) {
+ String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString(
+ int index = filename.lastIndexOf(".");
+ String ext = filename.substring(index + 1);
+ fname = System.currentTimeMillis() + "." + ext;
+ part.write(uploadPath + "/" + fname);
+ category.setImages(fname);
+ } else if (images != null) {
+ category.setImages(images);
+ } else {
+ category.setImages("avatar.png");
+ }
+--- page 19 ---
+ } catch (FileNotFoundException fne) {
+ fne.printStackTrace();
+ }
+ // đưa model vào phương thức insert
+ cateService.insert(category);
+ // chuyển trang
+ resp.sendRedirect(req.getContextPath() + "/admin/categories");
+ }
+ if (url.contains("/admin/category/update")) {
+ // lấy dữ liệu từ form
+ int categoryid = Integer.parseInt(req.getParameter("categoryid"));
+ String categoryname = req.getParameter("categoryname");
+ int status = Integer.parseInt(req.getParameter("status"));
+ String images = req.getParameter("images");
+ // đưa dữ liệu vào model
+ Category category = cateService.findById(categoryid);
+ String fileold = category.getImages();
+ category.setCategoryname(categoryname);
+ category.setStatus(status);
+--- page 20 ---
+ String fname = "";
+ String uploadPath = constants.DIR; // upload vào thư mục bất kỳ
+ File uploadDir = new File(uploadPath);
+ if (!uploadDir.exists())
+ uploadDir.mkdir();
+ try {
+ Part part = req.getPart("images1");
+ if (part.getSize() > 0) {
+ // xóa file cũ trên thư mục
+ if (!category.getImages().substring(0, 5).equals("https") ) {
+ deleteFile(uploadPath+ "\\" + fileold);
+ }
+ String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString(
+ int index = filename.lastIndexOf(".");
+ String ext = filename.substring(index + 1);
+ fname = System.currentTimeMillis() + "." + ext;
+ part.write(uploadPath + "/" + fname);
+ category.setImages(fname);
+--- page 21 ---
+ } else if (images != null) {
+ category.setImages(images);
+ } else {
+ category.setImages(fileold);
+ }
+ } catch (FileNotFoundException fne) {
+ fne.printStackTrace();
+ }
+ // đưa model vào phương thức insert
+ cateService.update(category);
+ // chuyển trang
+ resp.sendRedirect(req.getContextPath() + "/admin/categories");
+ }
+ }
+ public static void deleteFile(String filePath) throws IOException {
+ Path path = Paths.get(filePath);
+ Files.delete(path);
+ }
+}
+--- page 22 ---
+6. Viết các trang view
+category-list.jsp
+<a href="<c:url value="/admin/category/add"/>">Add Category</a><br>
+<hr>
+<table border="1" width="100%">
+<tr>
+<th>STT</th>
+<th>Images</th>
+<th>Category name</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+<c:forEach items="${listcate}" var="cate" varStatus="STT">
+<tr>
+<td>${STT.index+1 }</td>
+<c:if test="${cate.images.substring(0,5)=='https'}">
+<c:url value="${cate.images }" var="imgUrl"></c:url>
+</c:if>
+<c:if test="${cate.images.substring(0,5)!='https'}">
+--- page 23 ---
+<c:url value="/image?fname=${cate.images }" var="imgUrl"></c:url>
+</c:if>
+<td><img height="150" width="200" src="${imgUrl}" /></td>
+<td>${cate.categoryname }</td>
+<td>
+<c:if test="${cate.status==1 }">
+Hoạt động
+</c:if>
+<c:if test="${cate.status!=1 }">
+Khóa
+</c:if>
+</td>
+<td><a href="<c:url value='/admin/category/edit?id=${cate.categoryid }'/>">Sửa</a
+| <a href="<c:url value='/admin/category/delete?id=${cate.categoryid }'/>">Xóa</a
+</td>
+</tr>
+</c:forEach>
+</table>
+========================
+--- page 24 ---
+category-add.jsp
+<form action="<c:url value="/admin/category/insert"/>" method="post" enctype="mul
+<label for="fname">Category name:</label><br>
+<input type="text" id="categoryname" name="categoryname"><br>
+<label for="lname">Link images:</label><br>
+<input type="text" id="images" name="images"><br>
+<label for="lname">Upload images:</label><br>
+<input type="file" id="images1" name="images1"><br>
+<label for="html">Status</label><br>
+<input type="radio" id="ston" name="status" value="1">
+<label for="css">Hoạt động</label><br>
+<input type="radio" id="stoff" name="status" value="0">
+<label for="javascript">Khóa</label>
+<br><br>
+<input type="submit" value="Insert">
+</form>
+--- page 25 ---
+=================
+category-edit.jsp
+<form action="<c:url value="/admin/category/update"/>" method="post" enctype="mul
+<input type="text" name ="categoryid" value="${cate.categoryid}" hidden="hidden">
+<label for="fname">Category name:</label><br>
+<input type="text" id="categoryname" name="categoryname" value="${cate.categoryna
+<label for="lname">Link images:</label><br>
+<input type="text" id="images" name="images" value="${cate.images}"><br>
+<c:if test="${cate.images.substring(0,5)=='https'}">
+<c:url value="${cate.images }" var="imgUrl"></c:url>
+</c:if>
+<c:if test="${cate.images.substring(0,5)!='https'}">
+<c:url value="/image?fname=${cate.images }" var="imgUrl"></c:url>
+</c:if>
+<img height="150" width="200" src="${imgUrl}" /><br>
+<label for="lname">Upload images:</label><br>
+<input type="file" id="images1" name="images1"><br>
+--- page 26 ---
+ 
+B ạ n đ ang đă ng nh ậ p v ớ i tên Nguyen Hoang Gia Huy (Thoát)
+Vietnamese  (vi) 
+English  (en) 
+Vietnamese  (vi) 
+<label for="html">Status</label><br>
+<input type="radio" id="ston" name="status" value="1" ${cate.status==1?'checked':
+<label for="css">Hoạt động</label><br>
+<input type="radio" id="stoff" name="status" value="0" ${cate.status!=1?'checked'
+<label for="javascript">Khóa</label>
+<br><br>
+<input type="submit" value="Update">
+</form>
+S ử a l ầ n cu ố i: Th ứ  N ă m, 27 tháng 8 2026, 8:22 AM
+--- page 27 ---
+Copyright HCM-UTE © 2025
+==================== WEPR330479_26_1_09_ persistence.xml _ UTEx.pdf
+--- page 1 ---
+1. Thư viện
+<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+<dependency>
+<groupId>org.hibernate</groupId>
+<artifactId>hibernate-core</artifactId>
+<version>6.6.1.Final</version>
+<scope>compile</scope>
+</dependency>
+--- page 2 ---
+=============
+2. persistence.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence 
+ https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+<!-- <persistence-unit name="jpa-hibernate-mysql"> 
+ <class>vn.iotstar.entity.Category</class>
+ <properties>
+ <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"
+ <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/
+ <property name="jakarta.persistence.jdbc.user" value="root" />
+ <property name="jakarta.persistence.jdbc.password" value="1234567@a$" />
+ <property name="jakarta.persistence.schema-generation.database.action" value="cre
+ <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+ <property name="hibernate.show_sql" value="true" />
+ <property name="hibernate.format_sql" value="true" />
+ </properties>
+--- page 3 ---
+ </persistence-unit> -->
+<persistence-unit name="jpa-hibernate-mysql">
+<class>vn.iotstar.entity.Category</class>
+<class>vn.iotstar.entity.Video</class>
+<properties>
+<property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:14
+<property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jd
+<property name="jakarta.persistence.jdbc.user" value="sa" />
+<property name="jakarta.persistence.jdbc.password" value="1234567@a$" />
+<property name="hibernate.show_sql" value="true" />
+<property name="hibernate.format_sql" value="true" />
+<property name="hibernate.hbm2ddl.auto" value="update" />
+<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2012Diale
+</properties>
+</persistence-unit>
+</persistence>
+3. Tạo entity
+package vn.iotstar.entity;
+--- page 4 ---
+import java.io.Serializable;
+import java.util.List;
+import jakarta.persistence.*;
+@Entity
+@Table(name="categories")
+@NamedQuery(name="Category.findAll", query="SELECT c FROM Category c")
+public class Category implements Serializable {
+ private static final long serialVersionUID = 1L;
+ @Id
+ @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Column(name="categoryId")
+ private int categoryId;
+ @Column(name="categoryname", columnDefinition ="NVARCHAR(255) NULL")
+ private String categoryname;
+ 
+ @Column(name="images", columnDefinition ="NVARCHAR(255) NULL")
+ private String images;
+--- page 5 ---
+ 
+ @Column(name="status")
+ private int status;
+ //bi-directional many-to-one association to Video
+ @OneToMany(mappedBy="categories")
+ private List<Video> videos;
+ 
+ public Category() {
+ }
+ public int getCategoryId() {
+ return this.categoryId;
+ }
+ public void setCategoryId(int categoryId) {
+ this.categoryId = categoryId;
+ }
+ 
+ 
+ public String getCategoryname() {
+--- page 6 ---
+ return categoryname;
+ }
+ public void setCategoryname(String categoryname) {
+ this.categoryname = categoryname;
+ }
+ 
+ public String getImages() {
+ return images;
+ }
+ public void setImages(String images) {
+ this.images = images;
+ }
+ public int getStatus() {
+ return status;
+ }
+ public void setStatus(int status) {
+ this.status = status;
+ }
+--- page 7 ---
+ public List<Video> getVideos() {
+ return this.videos;
+ }
+ public void setVideos(List<Video> videos) {
+ this.videos = videos;
+ }
+ public Video addVideo(Video video) {
+ getVideos().add(video);
+ video.setCategory(this);
+ return video;
+ }
+ public Video removeVideo(Video video) {
+ getVideos().remove(video);
+ video.setCategory(null);
+ return video;
+ }
+}
+--- page 8 ---
+=========
+package vn.iotstar.entity;
+import java.io.Serializable;
+import java.util.List;
+import jakarta.persistence.*;
+@Entity
+@Table(name="videos")
+@NamedQuery(name="Video.findAll", query="SELECT v FROM Video v")
+public class Video implements Serializable {
+ private static final long serialVersionUID = 1L;
+ @Id
+ @Column(name="videoId")
+ private String videoId;
+ @Column(name="active")
+ private boolean active;
+ @Column(name="description", columnDefinition ="NVARCHAR(MAX) NULL")
+ private String description;
+--- page 9 ---
+ @Column(name="poster", columnDefinition ="NVARCHAR(255) NULL")
+ private String poster;
+ @Column(name="title", columnDefinition ="NVARCHAR(255) NULL")
+ private String title;
+ @Column(name="views")
+ private int views;
+ //bi-directional many-to-one association to Category
+ @ManyToOne
+ @JoinColumn(name="categoryId")
+ private Category categories;
+ public Video() {
+ }
+ public String getVideoId() {
+ return this.videoId;
+ }
+ public void setVideoId(String videoId) {
+ this.videoId = videoId;
+ }
+--- page 10 ---
+ public boolean getActive() {
+ return this.active;
+ }
+ public void setActive(boolean active) {
+ this.active = active;
+ }
+ 
+ public String getDescription() {
+ return description;
+ }
+ public void setDescription(String description) {
+ this.description = description;
+ }
+ public String getPoster() {
+ return poster;
+ }
+ public void setPoster(String poster) {
+--- page 11 ---
+ this.poster = poster;
+ }
+ public String getTitle() {
+ return title;
+ }
+ public void setTitle(String title) {
+ this.title = title;
+ }
+ public int getViews() {
+ return this.views;
+ }
+ public void setViews(int views) {
+ this.views = views;
+ }
+ public Category getCategory() {
+ return this.categories;
+ }
+--- page 12 ---
+ public void setCategory(Category category) {
+ this.categories = category;
+ }
+}
+=========
+4. Configs
+package vn.iotstar.config;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceContext;
+@PersistenceContext
+public class JpaConfig {
+ public static EntityManager getEntityManager() {
+ EntityManagerFactory factory = Persistence.createEntityManagerFactory("jpa-hiber
+ return factory.createEntityManager();
+ }
+}
+--- page 13 ---
+5. test
+package vn.iotstar.config;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import vn.iotstar.entity.Category;
+import vn.iotstar.entity.Video;
+public class Test {
+ public static void main(String[] args) {
+ EntityManager enma = JpaConfig.getEntityManager();
+ EntityTransaction trans = enma.getTransaction();
+ Category cate = new Category();
+ cate.setCategoryname("Iphone");
+ cate.setImages("abc.jpg");
+ cate.setStatus(1);
+ Video video = new Video();
+ video.setVideoId("v01");
+ video.setTitle("test");
+ video.setCategory(cate);
+ try {
+--- page 14 ---
+ trans.begin();
+ enma.persist(cate);
+ enma.persist(video);
+ trans.commit();
+ } catch (Exception e) {
+ e.printStackTrace();
+ trans.rollback();
+ throw e;
+ }finally {
+ enma.close();
+ }
+ }
+}
+S ử a l ầ n cu ố i: Th ứ  T ư , 2 tháng 10 2024, 10:30 AM
+--- page 15 ---
+ 
+B ạ n đ ang đă ng nh ậ p v ớ i tên Nguyen Hoang Gia Huy (Thoát)
+Vietnamese  (vi) 
+English  (en) 
+Vietnamese  (vi) 
+Copyright HCM-UTE © 2025
