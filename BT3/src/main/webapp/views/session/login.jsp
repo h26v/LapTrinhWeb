@@ -4,6 +4,10 @@
 <title>Đăng nhập Session</title>
 <section class="card" style="max-width: 520px; margin: 0 auto;">
     <h1>Đăng nhập Session</h1>
+    <c:if test="${not empty sessionScope.success}">
+        <p class="alert alert-success"><c:out value="${sessionScope.success}"/></p>
+        <c:remove var="success" scope="session"/>
+    </c:if>
     <c:if test="${not empty alert}">
         <p class="alert alert-error" role="alert"><c:out value="${alert}"/></p>
     </c:if>
@@ -16,5 +20,9 @@
                style="width:100%;max-width:460px;padding:10px;border:1px solid #c8d3e2;border-radius:6px;"/>
         <div><button type="submit">Đăng nhập</button></div>
     </form>
+    <p>
+        <a href="<c:url value='/session/register'/>">Đăng ký tài khoản</a>
+        · <a href="<c:url value='/session/forgot-password'/>">Quên mật khẩu?</a>
+    </p>
     <p class="account-meta">Tài khoản demo: <code>trung</code> / <code>123</code></p>
 </section>

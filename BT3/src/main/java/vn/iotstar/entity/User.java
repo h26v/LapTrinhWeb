@@ -49,6 +49,23 @@ public class User implements Serializable {
     @Column(name = "createddate")
     private Date createdDate;
 
+    @Column(name = "active", columnDefinition = "int not null default 1")
+    private int active = 1;
+
+    @Column(name = "activation_otp_hash", columnDefinition = "varchar(255) null")
+    private String activationOtpHash;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "activation_otp_expires_at")
+    private Date activationOtpExpiresAt;
+
+    @Column(name = "reset_otp_hash", columnDefinition = "varchar(255) null")
+    private String resetOtpHash;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "reset_otp_expires_at")
+    private Date resetOtpExpiresAt;
+
     public User() {
     }
 
@@ -122,5 +139,45 @@ public class User implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
+    }
+
+    public String getActivationOtpHash() {
+        return activationOtpHash;
+    }
+
+    public void setActivationOtpHash(String activationOtpHash) {
+        this.activationOtpHash = activationOtpHash;
+    }
+
+    public Date getActivationOtpExpiresAt() {
+        return activationOtpExpiresAt;
+    }
+
+    public void setActivationOtpExpiresAt(Date activationOtpExpiresAt) {
+        this.activationOtpExpiresAt = activationOtpExpiresAt;
+    }
+
+    public String getResetOtpHash() {
+        return resetOtpHash;
+    }
+
+    public void setResetOtpHash(String resetOtpHash) {
+        this.resetOtpHash = resetOtpHash;
+    }
+
+    public Date getResetOtpExpiresAt() {
+        return resetOtpExpiresAt;
+    }
+
+    public void setResetOtpExpiresAt(Date resetOtpExpiresAt) {
+        this.resetOtpExpiresAt = resetOtpExpiresAt;
     }
 }

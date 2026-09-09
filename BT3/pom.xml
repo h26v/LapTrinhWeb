@@ -41,7 +41,7 @@
 
         <!-- JPA 3.0 / Jakarta Persistence, cai dat boi Hibernate 6 -->
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>6.6.1.Final</version>
             <scope>compile</scope>
@@ -59,6 +59,20 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
+        </dependency>
+
+        <!-- Gui email OTP qua SMTP -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- Hash mat khau va OTP -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
         </dependency>
 
         <!-- SiteMesh 3.1.x dung javax.servlet cho Tomcat 9 -->

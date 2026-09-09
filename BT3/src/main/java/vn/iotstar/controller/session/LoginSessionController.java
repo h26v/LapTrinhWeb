@@ -13,9 +13,12 @@ import vn.iotstar.entity.User;
 import vn.iotstar.service.IUserService;
 import vn.iotstar.service.impl.UserServiceImpl;
 import vn.iotstar.util.Constant;
+import vn.iotstar.util.PasswordUtil;
 
 @WebServlet(urlPatterns = { "/session/login" })
 public class LoginSessionController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
     private final IUserService userService = new UserServiceImpl();
 
     @Override
@@ -33,8 +36,19 @@ public class LoginSessionController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        String username = req.getParameter("username");
+        String username = trim(req.getParameter("username"));
         String password = req.getParameter("password");
+
+        User found = userService.findByUsername(username);
+        if (found != null && found.getActive() != 1
+                && PasswordUtil.matches(password, found.getPassWord())) {
+            HttpSession session = req.getSession(true);
+            session.setAttribute("activationUserId", found.getId());
+            session.setAttribute("activationEmail", found.getEmail());
+            req.setAttribute("alert", "Tai khoan chua kich hoat. Vui long nhap OTP trong email.");
+            req.getRequestDispatcher("/views/session/register-verify.jsp").forward(req, resp);
+            return;
+        }
 
         User user = userService.login(username, password);
         if (user != null) {
@@ -46,5 +60,9 @@ public class LoginSessionController extends HttpServlet {
             req.setAttribute("alert", "Tai khoan hoac mat khau khong dung");
             req.getRequestDispatcher("/views/session/login.jsp").forward(req, resp);
         }
+    }
+
+    private String trim(String value) {
+        return value == null ? null : value.trim();
     }
 }
