@@ -1,0 +1,26 @@
+body { background: #f4f7fb; }
+
+/* ===== Header ===== */
+.site-header { background: #12305b; color: #fff; }
+.site-header .brand { color: #fff; font-size: 1.25rem; font-weight: 700; text-decoration: none; }
+.site-header .brand:hover { color: #cfe0ff; }
+.student-avatar {
+    width: 72px; height: 72px; object-fit: cover; border-radius: 50%;
+    border: 3px solid #fff; background: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+}
+.site-nav { background: #0d2343; }
+.site-nav .nav-link { color: rgba(255, 255, 255, .8); }
+.site-nav .nav-link:hover { color: #fff; }
+
+/* ===== Footer ===== */
+.site-footer { background: #12305b; color: #fff; }
+
+/* ===== Noi dung ===== */
+.card { box-shadow: 0 8px 24px rgba(23, 32, 51, .06); }
+.thumb { width: 56px; height: 56px; object-fit: cover; border-radius: .5rem; }
+.thumb-empty { display: inline-grid; place-items: center; background: #eef3f9; color: #69758a; }
+.preview { max-width: 240px; max-height: 240px; object-fit: cover; border-radius: .75rem; }
+.preview-empty {
+    aspect-ratio: 1; border-radius: .75rem; background: #eef3f9; color: #69758a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}

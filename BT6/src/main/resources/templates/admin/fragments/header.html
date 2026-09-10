@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header" class="site-header">
+    <div class="container d-flex align-items-center gap-3 py-3">
+        <!-- Anh sinh vien thuc hien (cau hinh trong student.properties) -->
+        <img class="student-avatar" th:src="@{${student.avatar}}" src="/images/student.svg"
+             th:alt="${student.fullName}" alt="Ảnh sinh viên">
+        <div class="me-auto">
+            <a class="brand" th:href="@{/admin/categories}">BT6 · Quản lý danh mục</a>
+            <div class="small text-white-50">Spring Boot 4 · Thymeleaf · Thymeleaf Layout Dialect</div>
+        </div>
+        <div class="text-end d-none d-md-block">
+            <div class="fw-semibold" th:text="${student.fullName}">Họ tên</div>
+            <div class="small text-white-50">MSSV: <span th:text="${student.studentId}">00000000</span></div>
+        </div>
+    </div>
+    <nav class="navbar navbar-expand navbar-dark site-nav">
+        <div class="container">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/categories/searchpaginated}">
+                        <i class="bi bi-list-ul"></i> Danh sách danh mục
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/categories/add}">
+                        <i class="bi bi-plus-circle"></i> Thêm danh mục
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+</body>
+</html>

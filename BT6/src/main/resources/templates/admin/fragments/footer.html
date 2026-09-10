@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="site-footer">
+    <div class="container py-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-8">
+                <div class="fw-semibold">Sinh viên thực hiện</div>
+                <div>
+                    Họ tên: <strong th:text="${student.fullName}">Họ tên</strong>
+                    · MSSV: <strong th:text="${student.studentId}">00000000</strong>
+                    · Lớp: <span th:text="${student.className}">Lớp</span>
+                </div>
+                <div>Email: <span th:text="${student.email}">email</span></div>
+            </div>
+            <div class="col-md-4 text-md-end small">
+                <div th:text="${student.course}">Lập trình Web</div>
+                <div>GVHD: <span th:text="${student.instructor}">Giảng viên</span></div>
+                <div class="text-white-50">&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</span> BT6</div>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

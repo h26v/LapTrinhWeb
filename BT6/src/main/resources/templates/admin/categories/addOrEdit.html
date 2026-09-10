@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin}">
+<head>
+    <title th:text="${category.isEdit} ? 'Sửa danh mục' : 'Thêm danh mục'">Thêm danh mục</title>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <form th:action="@{/admin/categories/saveOrUpdate}" method="post"
+                  enctype="multipart/form-data" th:object="${category}" novalidate>
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h5 mb-0" th:text="*{isEdit} ? 'Sửa danh mục' : 'Thêm danh mục mới'">Thêm danh mục mới</h1>
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" th:field="*{isEdit}">
+
+                        <!-- ID chi hien khi sua -->
+                        <div class="mb-3" th:if="*{isEdit}">
+                            <label for="categoryId" class="form-label">ID</label>
+                            <input type="text" class="form-control" th:field="*{categoryId}" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:field="*{categoryName}"
+                                   th:errorclass="is-invalid" maxlength="255" placeholder="Ví dụ: Điện thoại">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('categoryName')}"
+                                 th:errors="*{categoryName}">Lỗi tên</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imageFile" class="form-label">Ảnh</label>
+                            <div th:unless="${#strings.isEmpty(category.images)}" class="mb-2">
+                                <img class="preview" th:src="@{/image(fname=*{images})}" alt="Ảnh hiện tại">
+                                <div class="form-text">Chọn ảnh mới nếu muốn thay ảnh hiện tại.</div>
+                            </div>
+                            <input type="file" class="form-control" id="imageFile" name="imageFile"
+                                   accept="image/png,image/jpeg,image/gif,image/bmp"
+                                   th:classappend="${#fields.hasErrors('images')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('images')}"
+                                 th:errors="*{images}">Lỗi ảnh</div>
+                            <div class="form-text">PNG, JPEG, GIF hoặc BMP, tối đa 5 MB.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="form-label d-block">Trạng thái</span>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{status}" value="1" id="statusActive">
+                                <label class="form-check-label" for="statusActive">Hoạt động</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{status}" value="0" id="statusHidden">
+                                <label class="form-check-label" for="statusHidden">Ẩn</label>
+                            </div>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('status')}"
+                                 th:errors="*{status}">Lỗi trạng thái</div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> <span th:text="*{isEdit} ? 'Cập nhật' : 'Lưu'">Lưu</span>
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="@{/admin/categories/searchpaginated}">Quay lại</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>
