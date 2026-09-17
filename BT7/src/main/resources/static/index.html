@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="BT7 - quản lý Product và Category bằng RESTful API và AJAX">
+    <title>BT7 / Product Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand-lockup">
+            <div class="brand-mark">B7</div>
+            <div>
+                <div class="brand-title">REST<span>OPS</span></div>
+                <div class="brand-caption">AJAX management console</div>
+            </div>
+        </div>
+
+        <div class="sidebar-label">Workspace</div>
+        <nav class="side-nav" aria-label="Điều hướng dữ liệu">
+            <button type="button" class="side-link active" data-resource="products">
+                <span class="side-icon"><i class="fa-solid fa-cubes-stacked"></i></span>
+                <span>Products</span>
+                <span class="side-count" id="product-nav-count">—</span>
+            </button>
+            <button type="button" class="side-link" data-resource="categories">
+                <span class="side-icon"><i class="fa-solid fa-layer-group"></i></span>
+                <span>Categories</span>
+                <span class="side-count" id="category-nav-count">—</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="api-status-card">
+                <span class="status-dot"></span>
+                <div>
+                    <div class="status-title">API online</div>
+                    <div class="status-caption">Spring Boot · H2</div>
+                </div>
+            </div>
+            <div class="sidebar-footnote">BT7 · RESTful + AJAX</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="breadcrumb-line"><span>Workspace</span><i class="fa-solid fa-chevron-right"></i><strong id="breadcrumb-current">Products</strong></div>
+            <div class="topbar-actions">
+                <span class="method-pill"><span class="method-dot"></span> REST API</span>
+                <button class="icon-button" type="button" title="Tải lại dữ liệu" id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i></button>
+            </div>
+        </header>
+
+        <section class="page-intro">
+            <div>
+                <div class="eyebrow">DATA CATALOG / 07</div>
+                <h1 id="page-title">Products</h1>
+                <p id="page-subtitle">Quản lý danh mục sản phẩm qua RESTful API và AJAX.</p>
+            </div>
+            <button class="btn btn-primary add-button" type="button" id="add-btn">
+                <i class="fa-solid fa-plus"></i><span id="add-label">Thêm product</span>
+            </button>
+        </section>
+
+        <section class="stats-row" aria-label="Tổng quan">
+            <div class="stat-card accent-card">
+                <div class="stat-icon"><i class="fa-solid fa-database"></i></div>
+                <div><div class="stat-label">Tổng bản ghi</div><div class="stat-value" id="total-records">—</div></div>
+                <span class="stat-trend"><i class="fa-solid fa-chart-line"></i> live</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon soft-blue"><i class="fa-solid fa-filter"></i></div>
+                <div><div class="stat-label">Kết quả hiện tại</div><div class="stat-value" id="visible-records">—</div></div>
+                <span class="stat-note" id="page-indicator">Trang —</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon soft-yellow"><i class="fa-solid fa-bolt"></i></div>
+                <div><div class="stat-label">Trạng thái</div><div class="stat-value small-value">Sẵn sàng</div></div>
+                <span class="stat-note">AJAX</span>
+            </div>
+        </section>
+
+        <section class="data-card">
+            <div class="data-toolbar">
+                <div class="toolbar-title"><span class="live-pulse"></span><span id="table-title">Product directory</span></div>
+                <div class="toolbar-controls">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="search-input" placeholder="Tìm theo tên..." aria-label="Tìm kiếm">
+                        <kbd>⌘ K</kbd>
+                    </div>
+                    <select class="form-select compact-select d-none" id="category-filter" aria-label="Lọc theo category">
+                        <option value="">Tất cả category</option>
+                    </select>
+                    <select class="form-select compact-select" id="page-size" aria-label="Số bản ghi mỗi trang">
+                        <option value="5">5 / trang</option>
+                        <option value="8" selected>8 / trang</option>
+                        <option value="12">12 / trang</option>
+                        <option value="20">20 / trang</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table data-table mb-0">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+                <div class="empty-state d-none" id="empty-state">
+                    <div class="empty-icon"><i class="fa-regular fa-folder-open"></i></div>
+                    <h3>Chưa có dữ liệu phù hợp</h3>
+                    <p>Thử đổi từ khóa hoặc tạo một bản ghi mới.</p>
+                </div>
+                <div class="loading-state d-none" id="loading-state"><div class="spinner-border spinner-border-sm"></div> Đang tải dữ liệu...</div>
+            </div>
+
+            <div class="table-footer">
+                <div class="footer-summary" id="footer-summary">Hiển thị —</div>
+                <nav aria-label="Phân trang"><ul class="pagination mb-0" id="pagination"></ul></nav>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            <span><i class="fa-solid fa-circle-info"></i> API endpoint: <code id="endpoint-label">/api/product</code></span>
+            <span>Built for BT7 <span class="footer-separator">·</span> Spring Boot 3</span>
+        </footer>
+    </main>
+</div>
+
+<div class="modal fade" id="entity-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div><div class="modal-kicker" id="modal-kicker">NEW RECORD</div><h2 class="modal-title" id="modal-title">Thêm product</h2></div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <form id="entity-form">
+                <div class="modal-body" id="form-fields"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn"><i class="fa-solid fa-check"></i> Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-4">
+    <div id="app-toast" class="toast border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body"><i class="toast-symbol"></i><span id="toast-message"></span></div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
