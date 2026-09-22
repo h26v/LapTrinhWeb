@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/layout :: head('Error')}"></head>
+<body>
+<div class="auth-page">
+    <div class="auth-card">
+        <h1>Co loi xay ra</h1>
+        <p th:text="${message}">Error</p>
+        <a class="button" th:href="@{/}">Ve trang chu</a>
+    </div>
+</div>
+</body>
+</html>

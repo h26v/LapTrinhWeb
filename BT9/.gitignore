@@ -1,0 +1,36 @@
+HELP.md
+target/
+*.class
+
+### Environment / secrets ###
+.env
+.env.*
+!.env.example
+
+### Maven ###
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+
+### IDE ###
+.idea
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### App ###
+uploads/
+
+### Course PDFs (not part of the submitted source) ###
+*.pdf
+vidu1.txt
+vidu2.txt
+vidu3.txt

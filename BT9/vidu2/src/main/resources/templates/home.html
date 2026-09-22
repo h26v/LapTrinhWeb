@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <title>Trang chu</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <h1>Trang chu UTEShop</h1>
+    <p>Xin chao <strong th:text="${#authentication.principal.fullName}">User</strong></p>
+</main>
+</body>
+</html>

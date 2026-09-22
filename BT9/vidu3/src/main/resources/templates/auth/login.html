@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/layout :: head('Dang nhap')}"></head>
+<body>
+<div class="auth-page">
+    <div class="auth-card">
+        <h1>Dang nhap</h1>
+        <div th:if="${param.error}" class="alert error">Username/password khong dung hoac tai khoan chua duoc xac thuc.</div>
+        <div th:if="${param.logout}" class="alert success">Ban da dang xuat.</div>
+        <div th:if="${success}" class="alert success" th:text="${success}"></div>
+
+        <form th:action="@{/login}" method="post">
+            <label>Username</label>
+            <input name="username" required autofocus>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button class="button full" type="submit">Dang nhap</button>
+        </form>
+        <p><a th:href="@{/register}">Tao tai khoan</a></p>
+        <p><a th:href="@{/forgot-password}">Quen mat khau?</a></p>
+    </div>
+</div>
+</body>
+</html>

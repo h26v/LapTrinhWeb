@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header" class="topbar">
+    <nav>
+        <a th:href="@{/}" class="brand">UTEShop</a>
+
+        <div th:if="${#authorization.expression('isAuthenticated()')}" class="account">
+            <img th:src="${#authentication.principal.images != null and !#strings.isEmpty(#authentication.principal.images)
+                             ? #authentication.principal.images
+                             : '/images/avatar-default.png'}"
+                 alt="Avatar" width="40" height="40" class="avatar">
+
+            <span th:text="${#authentication.principal.fullName}">Nguyen Van A</span>
+            <span th:text="'(' + ${#authentication.principal.username} + ')'">(username)</span>
+            <span th:text="${#authentication.principal.email}">email@gmail.com</span>
+            <span th:text="${#authentication.principal.role}">ROLE_USER</span>
+
+            <form th:action="@{/logout}" method="post" style="display:inline">
+                <button type="submit">Dang xuat</button>
+            </form>
+        </div>
+
+        <div th:unless="${#authorization.expression('isAuthenticated()')}">
+            <a th:href="@{/login}">Dang nhap</a>
+        </div>
+    </nav>
+</header>
+</body>
+</html>

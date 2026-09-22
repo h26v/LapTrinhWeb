@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dang nhap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h2>Dang nhap</h2>
+
+<div th:if="${param.error}">
+    <p style="color:red">Username/email hoac password khong dung</p>
+</div>
+<div th:if="${param.logout}">
+    <p style="color:green">Ban da dang xuat</p>
+</div>
+
+<form th:action="@{/login}" method="post">
+    <div>
+        <label>Username hoac Email</label>
+        <input type="text" name="username" placeholder="Username hoac email" required>
+    </div>
+    <div>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Password" required>
+    </div>
+    <button type="submit">Dang nhap</button>
+</form>
+</body>
+</html>
