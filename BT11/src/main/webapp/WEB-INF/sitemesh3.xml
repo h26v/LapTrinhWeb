@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sitemesh 3.2: duong dan decorator tinh tu /WEB-INF/decorators/ -->
+<sitemesh>
+    <!-- Vai tro User: toan bo trang phia nguoi dung -->
+    <mapping path="/*" decorator="user.jsp"/>
+
+    <!-- Vai tro Admin: trang quan tri -->
+    <mapping path="/admin" decorator="admin.jsp"/>
+    <mapping path="/admin/*" decorator="admin.jsp"/>
+
+    <!-- Khong trang tri anh -->
+    <mapping path="/image" exclue="true"/>
+</sitemesh>

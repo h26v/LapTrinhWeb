@@ -1,0 +1,10 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ page import="vn.iotstar.util.Constant_24162046" %>
+<%-- Footer dung chung: Ho ten, MSSV, Ma de --%>
+<footer class="border-top bg-light mt-5 py-3">
+    <div class="container text-center small text-secondary">
+        Họ tên: <strong><%= Constant_24162046.FULL_NAME %></strong>
+        &nbsp;|&nbsp; MSSV: <strong><%= Constant_24162046.MSSV %></strong>
+        &nbsp;|&nbsp; Mã đề: <strong><%= Constant_24162046.MA_DE %></strong>
+    </div>
+</footer>

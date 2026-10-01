@@ -1,0 +1,23 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%-- Phan trang dung chung. Can request attribute: result (PageResult_24162046), pageUrl (vd: /ctx/home?page=) --%>
+<c:if test="${result.totalPages > 1}">
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item ${result.hasPrev ? '' : 'disabled'}">
+                <a class="page-link" href="${pageUrl}${result.page - 1}">&laquo;</a>
+            </li>
+            <c:forEach var="i" begin="1" end="${result.totalPages}">
+                <li class="page-item ${i == result.page ? 'active' : ''}">
+                    <a class="page-link" href="${pageUrl}${i}">${i}</a>
+                </li>
+            </c:forEach>
+            <li class="page-item ${result.hasNext ? '' : 'disabled'}">
+                <a class="page-link" href="${pageUrl}${result.page + 1}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</c:if>
+<p class="text-center text-secondary small">
+    Trang ${result.page}/${result.totalPages} &middot; Tổng ${result.totalItems} mục
+</p>

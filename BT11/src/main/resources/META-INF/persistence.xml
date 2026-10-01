@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0"
+             xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+
+    <persistence-unit name="bookstore-24162046" transaction-type="RESOURCE_LOCAL">
+        <class>vn.iotstar.entity.User_24162046</class>
+        <class>vn.iotstar.entity.Book_24162046</class>
+        <class>vn.iotstar.entity.Author_24162046</class>
+        <class>vn.iotstar.entity.Rating_24162046</class>
+        <class>vn.iotstar.entity.CartItem_24162046</class>
+        <class>vn.iotstar.entity.Order_24162046</class>
+        <class>vn.iotstar.entity.OrderItem_24162046</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <!-- SQL Server: sua lai url / user / password cho dung may cua ban
+                 (hoac truyen -Ddb.url=... -Ddb.user=... -Ddb.password=... khi chay) -->
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:sqlserver://localhost:1433;databaseName=BookStore;encrypt=false;trustServerCertificate=true"/>
+            <property name="jakarta.persistence.jdbc.driver"
+                      value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+            <property name="jakarta.persistence.jdbc.user"     value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value="1234567@a$"/>
+
+            <property name="hibernate.dialect"      value="org.hibernate.dialect.SQLServerDialect"/>
+            <!-- update: neu chua chay database.sql thi Hibernate tu tao bang -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql"     value="true"/>
+            <property name="hibernate.format_sql"   value="true"/>
+        </properties>
+    </persistence-unit>
+
+</persistence>
